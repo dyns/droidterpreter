@@ -1,6 +1,7 @@
 package a84934.droidterpreter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -60,7 +61,6 @@ public class GView extends View implements View.OnTouchListener{
         super.onSizeChanged(w, h, oldw, oldh);
     }
 
-
     Random random = new Random();
     Paint p = new Paint();
 
@@ -73,8 +73,8 @@ public class GView extends View implements View.OnTouchListener{
         for(Block b : blocks){
             p.setColor(b.color);
             canvas.drawRect(b.r, p);
-            p.setColor(Color.GREEN);
-            p.setTextSize(100);
+            p.setColor(Color.WHITE);
+            p.setTextSize(75);
 
             //canvas.drawRect(new Rect(b.r.left, b.r.top, b.r.left + 30, b.r.top + 30), p);
 
@@ -83,11 +83,11 @@ public class GView extends View implements View.OnTouchListener{
 
 
             if(b.type == Block.BlockType.NUM){
-                canvas.drawText("1", b.r.left, b.r.bottom, p);
+                String v = Integer.toString((int)b.value);
+                canvas.drawText(v, b.r.left, b.r.bottom, p);
             } else if(b.type == Block.BlockType.ADD){
                 canvas.drawText("+", b.r.left, b.r.bottom, p);
             }
-
 
         }
     }
@@ -96,10 +96,19 @@ public class GView extends View implements View.OnTouchListener{
         Block b = new Block();
         b.type = type;
         b.color =  Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256));
-        b.width = b.height = 75;
+        b.width = b.height = 100;
         int left = 0;
         int top = 0;
         b.r = new Rect(left,top, left + b.width, top +  b.height);
+
+        switch (type){
+            case ADD:
+                break;
+            case NUM:
+                b.value = 0;
+                break;
+        }
+
         this.blocks.add(b);
         this.invalidate();
     }
@@ -172,12 +181,28 @@ public class GView extends View implements View.OnTouchListener{
                     context.get() != null &&
                     !context.get().isFinishing()
                     && gview.get() != null){
-                gview.get().current = null;
-                Toast.makeText(context.get(), "long on: " + blockIndex, Toast.LENGTH_SHORT).show();
-
+                //Toast.makeText(context.get(), "long on: " + blockIndex, Toast.LENGTH_SHORT).show();
+                gview.get().showBlockOptions(blockIndex);
             }
         }
+    }
 
+    private void showBlockOptions(int i){
+        // disable drag
+        current = null;
+        stopLongHold();
+
+        Block b = blocks.get(i);
+
+        switch (b.type){
+            case NUM:
+                Intent intent = new Intent(getContext(), NumResultActivity.class);
+                intent.putExtra("i", i);
+                ((MainActivity)getContext()).startActivityForResult(intent, MainActivity.Companion.getNUM_RESULT());
+                break;
+            case ADD:
+                break;
+        }
     }
 
     LongHoldTask longHoldTask;
@@ -187,6 +212,18 @@ public class GView extends View implements View.OnTouchListener{
             longHoldTask.cancel(true);
         }
         longHoldTask = null;
+    }
+
+    public void setBlockValue(int i, int v){
+        Block b = blocks.get(i);
+        switch (b.type){
+            case ADD:
+                break;
+            case NUM:
+                b.value = v;
+                break;
+        }
+        invalidate();
     }
 
     @Override

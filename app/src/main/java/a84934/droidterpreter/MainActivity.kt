@@ -12,6 +12,10 @@ class MainActivity : AppCompatActivity() {
 
     private val BLOCK_TYPE_RESULT = 34
 
+    companion object {
+        val NUM_RESULT = 2
+    }
+
     private var gView : GView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,12 +43,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if(requestCode == BLOCK_TYPE_RESULT && resultCode == Activity.RESULT_OK){
+        if(resultCode == Activity.RESULT_OK){
             if(data != null){
-                var i = data.getIntExtra("i", -1);
-                if(i != -1){
-                    gView!!.addPlus(Block.fromIndex(i))
+
+                if(requestCode == BLOCK_TYPE_RESULT){
+                    var i = data.getIntExtra("i", -1);
+                    if(i != -1){
+                        gView!!.addPlus(Block.fromIndex(i))
+                    }
+                } else if(requestCode == NUM_RESULT){
+                    var v = data.getIntExtra("v", -1)
+                    var i = data.getIntExtra("i", -1)
+                    gView!!.setBlockValue(i, v)
                 }
+
             }
         }
         super.onActivityResult(requestCode, resultCode, data)

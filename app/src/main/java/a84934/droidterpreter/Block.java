@@ -6,6 +6,7 @@ public class Block {
     BlockType type;
     int width, height, color, deltaX, deltaY;
     Rect r;
+    Object value;
 
     enum BlockType {
         ADD,
