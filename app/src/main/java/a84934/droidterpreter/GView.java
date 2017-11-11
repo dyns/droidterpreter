@@ -5,23 +5,21 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.support.annotation.Nullable;
+import android.support.v4.app.SupportActivity;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class GView extends View implements View.OnTouchListener{
-
-    class Block {
-        int width, height, color, deltaX, deltaY;
-        Rect r;
-    }
 
     @Override
     public boolean performClick(){
@@ -64,28 +62,43 @@ public class GView extends View implements View.OnTouchListener{
 
 
     Random random = new Random();
+    Paint p = new Paint();
 
     @Override
     public void onDraw(Canvas canvas){
-
         // clear
         canvas.drawColor(Color.WHITE);
 
-        Paint p = new Paint();
         p.setStyle(Paint.Style.FILL);
-
         for(Block b : blocks){
             p.setColor(b.color);
             canvas.drawRect(b.r, p);
+            p.setColor(Color.GREEN);
+            p.setTextSize(100);
+
+            //canvas.drawRect(new Rect(b.r.left, b.r.top, b.r.left + 30, b.r.top + 30), p);
+
+            p.setTextAlign(Paint.Align.LEFT);
+            //canvas.drawText("L", b.r.left, b.r.bottom, p);
+
+
+            if(b.type == Block.BlockType.NUM){
+                canvas.drawText("1", b.r.left, b.r.bottom, p);
+            } else if(b.type == Block.BlockType.ADD){
+                canvas.drawText("+", b.r.left, b.r.bottom, p);
+            }
+
+
         }
     }
 
-    public void addPlus(){
+    public void addPlus(Block.BlockType type){
         Block b = new Block();
+        b.type = type;
         b.color =  Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256));
-        b.width = b.height = 200;
-        int left = 300;
-        int top = 100;
+        b.width = b.height = 75;
+        int left = 0;
+        int top = 0;
         b.r = new Rect(left,top, left + b.width, top +  b.height);
         this.blocks.add(b);
         this.invalidate();
@@ -125,14 +138,68 @@ public class GView extends View implements View.OnTouchListener{
         b.r = new Rect(x,y, right, bottom);
     }
 
+    static class LongHoldTask extends AsyncTask<Void, Void, Boolean> {
+
+        final int blockIndex;
+        final WeakReference<SupportActivity> context;
+        WeakReference<GView> gview;
+        LongHoldTask(int blockIndex, WeakReference<GView> gview, WeakReference<SupportActivity> context){
+            super();
+            this.blockIndex = blockIndex;
+            this.context = context;
+            this.gview = gview;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            long start = System.currentTimeMillis();
+            long delay = (long)(1.5 * 1000);
+            long end = start + delay;
+            while(System.currentTimeMillis() < end){
+                if(isCancelled()){
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean finished){
+            if(finished != null &&
+                    finished &&
+                    !isCancelled() &&
+                    context.get() != null &&
+                    !context.get().isFinishing()
+                    && gview.get() != null){
+                gview.get().current = null;
+                Toast.makeText(context.get(), "long on: " + blockIndex, Toast.LENGTH_SHORT).show();
+
+            }
+        }
+
+    }
+
+    LongHoldTask longHoldTask;
+
+    private void stopLongHold(){
+        if(longHoldTask != null){
+            longHoldTask.cancel(true);
+        }
+        longHoldTask = null;
+    }
+
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
+
+        stopLongHold();
 
         float x = motionEvent.getX();
         float y = motionEvent.getY();
         Log.d("touch coor", "x: " + x + " y: " + y);
 
         String addOn = ": " + x + "," + y;
+
         switch (motionEvent.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
 
@@ -143,6 +210,13 @@ public class GView extends View implements View.OnTouchListener{
                     blocks.add(b);
                     Rect r = b.r;
                     if(x >= r.left && x <= r.right && y >= r.top && y <= r.bottom){
+
+                        // found block
+                        longHoldTask = new LongHoldTask(i,
+                                new WeakReference<>(this),
+                                new WeakReference<>((SupportActivity) getContext()));
+                        longHoldTask.execute();
+
                         current = b;
                         current.deltaX = (int)x - r.left;
                         current.deltaY = (int)y - r.top;
@@ -154,11 +228,11 @@ public class GView extends View implements View.OnTouchListener{
                 break;
             case MotionEvent.ACTION_UP:
                 current = null;
-                Toast.makeText(getContext(), "Up" + addOn, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getContext(), "Up" + addOn, Toast.LENGTH_SHORT).show();
                 break;
             case MotionEvent.ACTION_CANCEL:
                 current = null;
-                Toast.makeText(getContext(), "Cancel" + addOn, Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getContext(), "Cancel" + addOn, Toast.LENGTH_SHORT).show();
                 break;
             case MotionEvent.ACTION_MOVE:
                 if(current != null){
@@ -176,4 +250,5 @@ public class GView extends View implements View.OnTouchListener{
 
         return true;
     }
+
 }

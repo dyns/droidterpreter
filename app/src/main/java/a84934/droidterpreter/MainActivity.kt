@@ -1,5 +1,7 @@
 package a84934.droidterpreter
 
+import android.app.Activity
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -8,29 +10,43 @@ import android.widget.LinearLayout
 
 class MainActivity : AppCompatActivity() {
 
+    private val BLOCK_TYPE_RESULT = 34
+
+    private var gView : GView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         var rootView = this.findViewById<LinearLayout>(R.id.mainRoot)
 
-        var gView = GView(this)
+        gView = GView(this)
 
-        gView.layoutParams = LinearLayout.LayoutParams(
+        gView!!.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
         )
 
         var addButton = this.findViewById<Button>(R.id.addButton);
-        addButton.setOnClickListener(View.OnClickListener {
-            gView.addPlus()
+        addButton.setOnClickListener({
+            //gView.addPlus()
+            //startActivity(Intent(this, BlockPickerActivity::class.java))
+            startActivityForResult(Intent(this, BlockPickerActivity::class.java), BLOCK_TYPE_RESULT)
         });
-
-        gView.addPlus()
 
         rootView.addView(gView)
 
+    }
 
-
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(requestCode == BLOCK_TYPE_RESULT && resultCode == Activity.RESULT_OK){
+            if(data != null){
+                var i = data.getIntExtra("i", -1);
+                if(i != -1){
+                    gView!!.addPlus(Block.fromIndex(i))
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 }
