@@ -3,6 +3,7 @@ package a84934.droidterpreter
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.LinearLayout
 
 class MainActivity : AppCompatActivity() {
@@ -19,6 +20,11 @@ class MainActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
         )
+
+        var addButton = this.findViewById<Button>(R.id.addButton);
+        addButton.setOnClickListener(View.OnClickListener {
+            gView.addPlus()
+        });
 
         gView.addPlus()
 
