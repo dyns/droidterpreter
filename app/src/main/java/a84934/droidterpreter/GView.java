@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import a84934.droidterpreter.BlockValSetActivities.SetAddValActivity;
+import a84934.droidterpreter.BlockValSetActivities.SetNumValActivity;
+
 public class GView extends View implements View.OnTouchListener{
 
     @Override
@@ -75,34 +78,61 @@ public class GView extends View implements View.OnTouchListener{
             canvas.drawRect(b.r, p);
             p.setColor(Color.WHITE);
             p.setTextSize(75);
+            p.setStrokeWidth(20);
 
             //canvas.drawRect(new Rect(b.r.left, b.r.top, b.r.left + 30, b.r.top + 30), p);
 
             p.setTextAlign(Paint.Align.LEFT);
             //canvas.drawText("L", b.r.left, b.r.bottom, p);
 
+            int offset = 15;
+            int textLeft = b.r.left + offset;
+            int textBottom = b.r.bottom - offset;
+
+            int centerX = b.r.left + (BLOCK_WIDTH / 2);
+            int centerOffset = (BLOCK_WIDTH / 4);
 
             if(b.type == Block.BlockType.NUM){
                 String v = Integer.toString((int)b.value);
-                canvas.drawText(v, b.r.left, b.r.bottom, p);
+                canvas.drawText(v, textLeft, textBottom, p);
             } else if(b.type == Block.BlockType.ADD){
-                canvas.drawText("+", b.r.left, b.r.bottom, p);
+
+                canvas.drawText("+", textLeft, textBottom, p);
+                if(b.value != null){
+                    p.setColor(Color.BLACK);
+                    AddBlockVal v = (AddBlockVal)b.value;
+                    Block toBlock;
+                    if(v.left >= 0) {
+                        toBlock = blocks.get(v.left);
+                        canvas.drawLine(centerX - centerOffset, b.r.bottom, toBlock.r.left, toBlock.r.top, p);
+                    }
+                    if(v.right >= 0){
+                        toBlock = blocks.get(v.right);
+                        canvas.drawLine(centerX + centerOffset, b.r.bottom, toBlock.r.left, toBlock.r.top, p);
+                    }
+                }
+
+
+
             }
 
         }
     }
 
+    private final int BLOCK_WIDTH = 130;
+
     public void addPlus(Block.BlockType type){
         Block b = new Block();
         b.type = type;
         b.color =  Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256));
-        b.width = b.height = 100;
+        b.width = b.height = BLOCK_WIDTH;
         int left = 0;
         int top = 0;
         b.r = new Rect(left,top, left + b.width, top +  b.height);
 
         switch (type){
             case ADD:
+                b.value = new AddBlockVal();
                 break;
             case NUM:
                 b.value = 0;
@@ -162,7 +192,7 @@ public class GView extends View implements View.OnTouchListener{
         @Override
         protected Boolean doInBackground(Void... voids) {
             long start = System.currentTimeMillis();
-            long delay = (long)(1.5 * 1000);
+            long delay = (long)(1 * 1000);
             long end = start + delay;
             while(System.currentTimeMillis() < end){
                 if(isCancelled()){
@@ -187,6 +217,10 @@ public class GView extends View implements View.OnTouchListener{
         }
     }
 
+    List<Integer> clickedBlocks;
+    Integer toClick;
+    int addBlockWaitIndex;
+
     private void showBlockOptions(int i){
         // disable drag
         current = null;
@@ -194,15 +228,39 @@ public class GView extends View implements View.OnTouchListener{
 
         Block b = blocks.get(i);
 
+        Intent intent;
         switch (b.type){
             case NUM:
-                Intent intent = new Intent(getContext(), NumResultActivity.class);
+                intent = new Intent(getContext(), SetNumValActivity.class);
                 intent.putExtra("i", i);
                 ((MainActivity)getContext()).startActivityForResult(intent, MainActivity.Companion.getNUM_RESULT());
                 break;
             case ADD:
+
+                Toast.makeText(getContext(), "Select left and then right blocks", Toast.LENGTH_LONG).show();
+
+                clickedBlocks = new ArrayList<>();
+                toClick = 2;
+                addBlockWaitIndex = i;
+
+                /*
+                intent = new Intent(getContext(), SetAddValActivity.class);
+                intent.putExtra("i", i);
+                ((MainActivity)getContext()).startActivityForResult(intent, MainActivity.Companion.getADD_BLOCK_RESULT());
+                */
+
                 break;
         }
+    }
+
+    private void setAddBlocksLeftRight(){
+        AddBlockVal v = new AddBlockVal();
+        v.left = clickedBlocks.get(0);
+        v.right = clickedBlocks.get(1);
+        clickedBlocks = null;
+        toClick = null;
+        blocks.get(addBlockWaitIndex).value = v;
+        invalidate();
     }
 
     LongHoldTask longHoldTask;
@@ -214,15 +272,9 @@ public class GView extends View implements View.OnTouchListener{
         longHoldTask = null;
     }
 
-    public void setBlockValue(int i, int v){
+    public void setBlockValue(int i, Object v){
         Block b = blocks.get(i);
-        switch (b.type){
-            case ADD:
-                break;
-            case NUM:
-                b.value = v;
-                break;
-        }
+        b.value = v;
         invalidate();
     }
 
@@ -243,10 +295,19 @@ public class GView extends View implements View.OnTouchListener{
                 current = null;
 
                 for(int i = blocks.size() - 1; i > -1; i--){
-                    Block b = blocks.remove(i);
-                    blocks.add(b);
+                    Block b = blocks.get(i);
                     Rect r = b.r;
                     if(x >= r.left && x <= r.right && y >= r.top && y <= r.bottom){
+
+                        if(toClick != null){
+                            toClick--;
+                            clickedBlocks.add(i);
+
+                            if(toClick <= 0){
+                                setAddBlocksLeftRight();
+                            }
+                            return true;
+                        }
 
                         // found block
                         longHoldTask = new LongHoldTask(i,

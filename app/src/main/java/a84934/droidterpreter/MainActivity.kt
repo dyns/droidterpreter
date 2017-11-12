@@ -14,6 +14,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         val NUM_RESULT = 2
+        val ADD_BLOCK_RESULT = 1
     }
 
     private var gView : GView? = null
@@ -56,6 +57,18 @@ class MainActivity : AppCompatActivity() {
                     var i = data.getIntExtra("i", -1)
                     gView!!.setBlockValue(i, v)
                 }
+
+
+                /*
+                else if(requestCode == ADD_BLOCK_RESULT){
+                    var l = data.getIntExtra("left", -1)
+                    var r = data.getIntExtra("right", -1)
+                    var i = data.getIntExtra("i", -1)
+                    var addBlockV = AddBlockVal()
+                    addBlockV.left = l
+                    addBlockV.right = r
+                    gView!!.setBlockValue(i, addBlockV)
+                }*/
 
             }
         }
