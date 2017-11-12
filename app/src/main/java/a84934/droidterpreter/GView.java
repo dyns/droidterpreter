@@ -22,8 +22,9 @@ import java.util.Random;
 
 import a84934.droidterpreter.BlockValSetActivities.SetAddValActivity;
 import a84934.droidterpreter.BlockValSetActivities.SetNumValActivity;
+import a84934.droidterpreter.BlockVals.BlockValMain;
 
-public class GView extends View implements View.OnTouchListener{
+public class GView extends View implements View.OnTouchListener {
 
     @Override
     public boolean performClick(){
@@ -92,6 +93,8 @@ public class GView extends View implements View.OnTouchListener{
             int centerX = b.r.left + (BLOCK_WIDTH / 2);
             int centerOffset = (BLOCK_WIDTH / 4);
 
+            Block toBlock;
+
             if(b.type == Block.BlockType.NUM){
                 String v = Integer.toString((int)b.value);
                 canvas.drawText(v, textLeft, textBottom, p);
@@ -101,7 +104,6 @@ public class GView extends View implements View.OnTouchListener{
                 if(b.value != null){
                     p.setColor(Color.BLACK);
                     AddBlockVal v = (AddBlockVal)b.value;
-                    Block toBlock;
                     if(v.left >= 0) {
                         toBlock = blocks.get(v.left);
                         canvas.drawLine(centerX - centerOffset, b.r.bottom, toBlock.r.left, toBlock.r.top, p);
@@ -111,9 +113,14 @@ public class GView extends View implements View.OnTouchListener{
                         canvas.drawLine(centerX + centerOffset, b.r.bottom, toBlock.r.left, toBlock.r.top, p);
                     }
                 }
-
-
-
+            } else if(b.type == Block.BlockType.MAIN){
+                canvas.drawText("M", textLeft, textBottom, p);
+                BlockValMain v = (BlockValMain) b.value;
+                if(v != null && v.startIndex > 0){
+                    p.setColor(Color.BLACK);
+                    toBlock = blocks.get(v.startIndex);
+                    canvas.drawLine(centerX + centerOffset, b.r.bottom, toBlock.r.left, toBlock.r.top, p);
+                }
             }
 
         }
@@ -136,6 +143,8 @@ public class GView extends View implements View.OnTouchListener{
                 break;
             case NUM:
                 b.value = 0;
+                break;
+            case MAIN:
                 break;
         }
 
@@ -250,16 +259,37 @@ public class GView extends View implements View.OnTouchListener{
                 */
 
                 break;
+            case MAIN:
+                Toast.makeText(getContext(), "Select start block", Toast.LENGTH_LONG).show();
+
+                clickedBlocks = new ArrayList<>();
+                toClick = 1;
+                addBlockWaitIndex = i;
+
+                break;
         }
     }
 
     private void setAddBlocksLeftRight(){
-        AddBlockVal v = new AddBlockVal();
-        v.left = clickedBlocks.get(0);
-        v.right = clickedBlocks.get(1);
+        Block editBlock = blocks.get(addBlockWaitIndex);
+
+        switch (editBlock.type){
+            case ADD:
+                AddBlockVal v = new AddBlockVal();
+                v.left = clickedBlocks.get(0);
+                v.right = clickedBlocks.get(1);
+                editBlock.value = v;
+                break;
+            case MAIN:
+                BlockValMain mv = new BlockValMain();
+                mv.startIndex = clickedBlocks.get(0);
+                editBlock.value = mv;
+                break;
+        }
+
         clickedBlocks = null;
         toClick = null;
-        blocks.get(addBlockWaitIndex).value = v;
+
         invalidate();
     }
 

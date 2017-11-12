@@ -41,6 +41,8 @@ class MainActivity : AppCompatActivity() {
 
         rootView.addView(gView)
 
+        gView!!.addPlus(Block.BlockType.MAIN);
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

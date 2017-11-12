@@ -10,7 +10,8 @@ public class Block {
 
     enum BlockType {
         ADD,
-        NUM
+        NUM,
+        MAIN
     }
 
     public static BlockType fromIndex(int i){
