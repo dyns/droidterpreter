@@ -39,6 +39,11 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(Intent(this, BlockPickerActivity::class.java), BLOCK_TYPE_RESULT)
         });
 
+        var executeButton = this.findViewById<Button>(R.id.executeButton);
+        executeButton.setOnClickListener({
+            gView!!.execute()
+        })
+
         rootView.addView(gView)
 
         gView!!.addPlus(Block.BlockType.MAIN);

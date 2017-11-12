@@ -10,12 +10,29 @@
     android:id="@+id/mainRoot"
     >
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add"
-        android:id="@+id/addButton"
-        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="Add"
+            android:id="@+id/addButton"
+            android:layout_weight="1"
+            />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="Execute"
+            android:id="@+id/executeButton"
+            android:layout_weight="1"
+            />
+
+    </LinearLayout>
+
 
 
 </LinearLayout>

@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v4.app.SupportActivity;
+import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -25,6 +26,14 @@ import a84934.droidterpreter.BlockValSetActivities.SetNumValActivity;
 import a84934.droidterpreter.BlockVals.BlockValMain;
 
 public class GView extends View implements View.OnTouchListener {
+
+    public void execute(){
+        new AlertDialog.Builder(getContext())
+                .setTitle("Result")
+                .setMessage("none yet!")
+                .setPositiveButton("done", null)
+                .show();
+    }
 
     @Override
     public boolean performClick(){
