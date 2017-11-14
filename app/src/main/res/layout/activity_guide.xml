@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:text="
+        The M block is the main block, it points to the start of the program.\n\n
+        Click add block to add a new block.\n\n
+        Drag blocks by taping and moving.\n\n
+        Tap and hold a number block to change its value.\n\n
+        Tap and hold an add block, then touch 2 blocks to set which blocks to add.\n\n
+        Tap and hold the M block, then tap on a block to set the starting block to the program.\n\n
+        There currently is only basic format checking, so if the app breaks when evaluating ...\n\n
+        Such as loops in the interpretation process.
+        "
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </ScrollView>
+
+
+
+</LinearLayout>

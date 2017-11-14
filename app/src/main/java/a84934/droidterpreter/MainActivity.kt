@@ -24,6 +24,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        var guideButton = findViewById<Button>(R.id.guideButton);
+        guideButton.setOnClickListener({
+            startActivity(Intent(this, GuideActivity::class.java));
+        })
+
         var rootView = this.findViewById<LinearLayout>(R.id.mainRoot)
 
         gView = GView(this)

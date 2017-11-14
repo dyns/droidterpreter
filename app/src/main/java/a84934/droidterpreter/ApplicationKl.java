@@ -19,10 +19,6 @@ public class ApplicationKl extends Application {
 
         blockTypes.add("Add");
         blockTypes.add("Num");
-
-        for (int i = 2; i < 100; i++) {
-            blockTypes.add("" + i);
-        }
     }
     // Called by the system when the device configuration changes while your component is running.
     // Overriding this method is totally optional!
