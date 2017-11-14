@@ -1,5 +1,6 @@
 package a84934.droidterpreter
 
+import a84934.droidterpreter.BlockVals.NumBV
 import android.app.Activity
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
@@ -60,9 +61,11 @@ class MainActivity : AppCompatActivity() {
                         gView!!.addPlus(Block.fromIndex(i))
                     }
                 } else if(requestCode == NUM_RESULT){
-                    var v = data.getIntExtra("v", -1)
+                    var v = data.getIntExtra("v", 0)
                     var i = data.getIntExtra("i", -1)
-                    gView!!.setBlockValue(i, v)
+                    if(i >= 0){
+                        gView!!.setBlockValue(i, NumBV(v))
+                    }
                 }
 
 

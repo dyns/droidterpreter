@@ -21,9 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import a84934.droidterpreter.BlockValSetActivities.SetAddValActivity;
 import a84934.droidterpreter.BlockValSetActivities.SetNumValActivity;
-import a84934.droidterpreter.BlockVals.BlockValMain;
+import a84934.droidterpreter.BlockVals.AddBV;
+import a84934.droidterpreter.BlockVals.BlockVals;
+import a84934.droidterpreter.BlockVals.MainBV;
+import a84934.droidterpreter.BlockVals.NumBV;
 import a84934.droidterpreter.Interpreter.Interpreter;
 
 public class GView extends View implements View.OnTouchListener {
@@ -33,17 +35,23 @@ public class GView extends View implements View.OnTouchListener {
     }
 
     private Interpreter.Expr buildExpressionR(Block b){
+        if(b == null){
+            throw new IllegalArgumentException("");
+        }
+
         switch (b.type){
             case MAIN:
-                return buildExpressionR(blocks.get(((BlockValMain) b.value).startIndex));
+                MainBV mbv = (MainBV) b.value;
+                return buildExpressionR(mbv.getStartBlock());
             case ADD:
-                AddBlockVal addBlockVal = (AddBlockVal)b.value;
+                AddBV abv = (AddBV) b.value;
                 return new Interpreter.Expr.AddE(
-                        buildExpressionR(blocks.get(addBlockVal.left)),
-                        buildExpressionR(blocks.get(addBlockVal.right))
+                        buildExpressionR(abv.getLeftBlock()),
+                        buildExpressionR(abv.getRightBlock())
                 );
             case NUM:
-                return new Interpreter.Expr.NumE((int) b.value);
+                NumBV nbv = (NumBV) b.value;
+                return new Interpreter.Expr.NumE(nbv.getNumber());
             default:
                 throw new IllegalArgumentException("");
         }
@@ -52,7 +60,13 @@ public class GView extends View implements View.OnTouchListener {
     public void execute(){
 
         Interpreter interp = new Interpreter();
-        String valDes = interp.interpret(buildExpression()).toString();
+        String valDes = "Bad block formatting, unable to parse.";
+
+        try {
+            valDes = interp.interpret(buildExpression()).toString();
+        } catch (IllegalArgumentException e){
+
+        }
 
         new AlertDialog.Builder(getContext())
                 .setTitle("Result")
@@ -131,29 +145,29 @@ public class GView extends View implements View.OnTouchListener {
             Block toBlock;
 
             if(b.type == Block.BlockType.NUM){
-                String v = Integer.toString((int)b.value);
+                String v = Integer.toString(((NumBV)b.value).getNumber());
                 canvas.drawText(v, textLeft, textBottom, p);
             } else if(b.type == Block.BlockType.ADD){
 
                 canvas.drawText("+", textLeft, textBottom, p);
                 if(b.value != null){
                     p.setColor(Color.BLACK);
-                    AddBlockVal v = (AddBlockVal)b.value;
-                    if(v.left >= 0) {
-                        toBlock = blocks.get(v.left);
+                    AddBV v = (AddBV)b.value;
+                    if(v.getLeftBlock() != null) {
+                        toBlock = v.getLeftBlock();
                         canvas.drawLine(centerX - centerOffset, b.r.bottom, toBlock.r.left, toBlock.r.top, p);
                     }
-                    if(v.right >= 0){
-                        toBlock = blocks.get(v.right);
+                    if(v.getRightBlock() != null){
+                        toBlock = v.getRightBlock();
                         canvas.drawLine(centerX + centerOffset, b.r.bottom, toBlock.r.left, toBlock.r.top, p);
                     }
                 }
             } else if(b.type == Block.BlockType.MAIN){
                 canvas.drawText("M", textLeft, textBottom, p);
-                BlockValMain v = (BlockValMain) b.value;
-                if(v != null && v.startIndex > 0){
+                MainBV v = (MainBV) b.value;
+                if(v.getStartBlock() != null){
                     p.setColor(Color.BLACK);
-                    toBlock = blocks.get(v.startIndex);
+                    toBlock = v.getStartBlock();
                     canvas.drawLine(centerX + centerOffset, b.r.bottom, toBlock.r.left, toBlock.r.top, p);
                 }
             }
@@ -174,12 +188,13 @@ public class GView extends View implements View.OnTouchListener {
 
         switch (type){
             case ADD:
-                b.value = new AddBlockVal();
+                b.value = new AddBV(null, null);
                 break;
             case NUM:
-                b.value = 0;
+                b.value = new NumBV(0);
                 break;
             case MAIN:
+                b.value = new MainBV(null);
                 break;
         }
 
@@ -310,15 +325,13 @@ public class GView extends View implements View.OnTouchListener {
 
         switch (editBlock.type){
             case ADD:
-                AddBlockVal v = new AddBlockVal();
-                v.left = clickedBlocks.get(0);
-                v.right = clickedBlocks.get(1);
-                editBlock.value = v;
+                AddBV addBV = (AddBV) editBlock.value;
+                addBV.setLeftBlock(blocks.get(clickedBlocks.get(0)));
+                addBV.setRightBlock(blocks.get(clickedBlocks.get(1)));
                 break;
             case MAIN:
-                BlockValMain mv = new BlockValMain();
-                mv.startIndex = clickedBlocks.get(0);
-                editBlock.value = mv;
+                MainBV mainBV = (MainBV) editBlock.value;
+                mainBV.setStartBlock(blocks.get(clickedBlocks.get(0)));
                 break;
         }
 
@@ -370,6 +383,8 @@ public class GView extends View implements View.OnTouchListener {
 
                             if(toClick <= 0){
                                 setAddBlocksLeftRight();
+                            } else {
+                                Toast.makeText(getContext(), "Click " + toClick + " more block(s)", Toast.LENGTH_SHORT).show();
                             }
                             return true;
                         }
@@ -385,6 +400,12 @@ public class GView extends View implements View.OnTouchListener {
                         current.deltaY = (int)y - r.top;
                         Log.d("down", "found block");
                         break;
+                    }
+
+                    if(toClick != null){
+                        Toast.makeText(getContext(),
+                                "Not a block, click " + toClick + " more",
+                                Toast.LENGTH_SHORT).show();
                     }
                 }
 
