@@ -24,13 +24,39 @@ import java.util.Random;
 import a84934.droidterpreter.BlockValSetActivities.SetAddValActivity;
 import a84934.droidterpreter.BlockValSetActivities.SetNumValActivity;
 import a84934.droidterpreter.BlockVals.BlockValMain;
+import a84934.droidterpreter.Interpreter.Interpreter;
 
 public class GView extends View implements View.OnTouchListener {
 
+    private Interpreter.Expr buildExpression(){
+        return buildExpressionR(blocks.get(0));
+    }
+
+    private Interpreter.Expr buildExpressionR(Block b){
+        switch (b.type){
+            case MAIN:
+                return buildExpressionR(blocks.get(((BlockValMain) b.value).startIndex));
+            case ADD:
+                AddBlockVal addBlockVal = (AddBlockVal)b.value;
+                return new Interpreter.Expr.AddE(
+                        buildExpressionR(blocks.get(addBlockVal.left)),
+                        buildExpressionR(blocks.get(addBlockVal.right))
+                );
+            case NUM:
+                return new Interpreter.Expr.NumE((int) b.value);
+            default:
+                throw new IllegalArgumentException("");
+        }
+    }
+
     public void execute(){
+
+        Interpreter interp = new Interpreter();
+        String valDes = interp.interpret(buildExpression()).toString();
+
         new AlertDialog.Builder(getContext())
                 .setTitle("Result")
-                .setMessage("none yet!")
+                .setMessage(valDes)
                 .setPositiveButton("done", null)
                 .show();
     }
