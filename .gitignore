@@ -1,3 +1,9 @@
+
+#dont save builds
+app/release
+app/build
+build
+
 *.swp
 *.iml
 .gradle

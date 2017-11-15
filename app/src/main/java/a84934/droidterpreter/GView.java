@@ -128,7 +128,7 @@ public class GView extends View implements View.OnTouchListener {
             canvas.drawRect(b.r, p);
             p.setColor(Color.WHITE);
             p.setTextSize(75);
-            p.setStrokeWidth(20);
+            p.setStrokeWidth(10);
 
             //canvas.drawRect(new Rect(b.r.left, b.r.top, b.r.left + 30, b.r.top + 30), p);
 
@@ -356,19 +356,37 @@ public class GView extends View implements View.OnTouchListener {
         invalidate();
     }
 
+    Float _oldX, _oldY;
+
+    private final int MOVE_DELTA_THRESHOLD = 5; //TODO change this to something with DP
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
 
-        stopLongHold();
-
         float x = motionEvent.getX();
         float y = motionEvent.getY();
+
+        if(motionEvent.getActionMasked() == MotionEvent.ACTION_MOVE){
+            boolean xPast = _oldX == null || (Math.abs(_oldX - x) > MOVE_DELTA_THRESHOLD);
+            boolean yPast = _oldY == null || (Math.abs(_oldY - y) > MOVE_DELTA_THRESHOLD);
+
+            if(!xPast && !yPast){
+                return true;
+            }
+        }
+
+        _oldX = x;
+        _oldY = y;
+
+        stopLongHold();
+
+
         Log.d("touch coor", "x: " + x + " y: " + y);
 
         String addOn = ": " + x + "," + y;
 
         switch (motionEvent.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
+                Log.d("move", "ACTION_DOWN");
 
                 current = null;
 
@@ -411,14 +429,20 @@ public class GView extends View implements View.OnTouchListener {
 
                 break;
             case MotionEvent.ACTION_UP:
+                Log.d("move", "ACTION_UP");
+
                 current = null;
                 //Toast.makeText(getContext(), "Up" + addOn, Toast.LENGTH_SHORT).show();
                 break;
             case MotionEvent.ACTION_CANCEL:
+                Log.d("move", "ACTION_CANCEL");
+
                 current = null;
                 // Toast.makeText(getContext(), "Cancel" + addOn, Toast.LENGTH_SHORT).show();
                 break;
             case MotionEvent.ACTION_MOVE:
+                Log.d("move", "ACTION_MOVE");
+
                 if(current != null){
                     Log.d("move", "moving");
                     moveBlock(current, x, y);
@@ -428,7 +452,7 @@ public class GView extends View implements View.OnTouchListener {
                 }
                 break;
             default:
-                //Toast.makeText(getContext(), "other" + addOn, Toast.LENGTH_SHORT).show();
+                Log.d("move", "ACTION OTHER");
                 break;
         }
 
