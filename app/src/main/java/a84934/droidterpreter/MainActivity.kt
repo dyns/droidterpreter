@@ -1,11 +1,12 @@
 package a84934.droidterpreter
 
 import a84934.droidterpreter.BlockVals.NumBV
+import a84934.droidterpreter.GraphView.GController
+import a84934.droidterpreter.GraphView.GView
 import android.app.Activity
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var gView : GView? = null
+    private var controller : GController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +35,8 @@ class MainActivity : AppCompatActivity() {
 
         gView = GView(this)
 
+        controller = GController(gView!!)
+
         gView!!.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
@@ -45,14 +49,14 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(Intent(this, BlockPickerActivity::class.java), BLOCK_TYPE_RESULT)
         });
 
-        var executeButton = this.findViewById<Button>(R.id.executeButton);
+        var executeButton = this.findViewById<Button>(R.id.executeButton)
         executeButton.setOnClickListener({
-            gView!!.execute()
+            controller!!.execute()
         })
 
         rootView.addView(gView)
 
-        gView!!.addPlus(Block.BlockType.MAIN);
+        controller!!.addPlus(Block.BlockType.MAIN)
 
     }
 
@@ -63,28 +67,15 @@ class MainActivity : AppCompatActivity() {
                 if(requestCode == BLOCK_TYPE_RESULT){
                     var i = data.getIntExtra("i", -1);
                     if(i != -1){
-                        gView!!.addPlus(Block.fromIndex(i))
+                        controller!!.addPlus(Block.fromIndex(i))
                     }
                 } else if(requestCode == NUM_RESULT){
                     var v = data.getIntExtra("v", 0)
                     var i = data.getIntExtra("i", -1)
                     if(i >= 0){
-                        gView!!.setBlockValue(i, NumBV(v))
+                        controller!!.setBlockValue(i, NumBV(v))
                     }
                 }
-
-
-                /*
-                else if(requestCode == ADD_BLOCK_RESULT){
-                    var l = data.getIntExtra("left", -1)
-                    var r = data.getIntExtra("right", -1)
-                    var i = data.getIntExtra("i", -1)
-                    var addBlockV = AddBlockVal()
-                    addBlockV.left = l
-                    addBlockV.right = r
-                    gView!!.setBlockValue(i, addBlockV)
-                }*/
-
             }
         }
         super.onActivityResult(requestCode, resultCode, data)

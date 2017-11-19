@@ -21,7 +21,7 @@ public class BlockTypeAdapter extends RecyclerView.Adapter<BlockTypeAdapter.VH>{
 
     private final OnClickListener listener;
 
-    public interface OnClickListener{
+    public interface OnClickListener {
         void onBlockTypeClicked(int i);
     }
 
@@ -45,7 +45,7 @@ public class BlockTypeAdapter extends RecyclerView.Adapter<BlockTypeAdapter.VH>{
     class VH extends RecyclerView.ViewHolder {
         TextView label;
         View root;
-        public VH(View itemView) {
+        VH(View itemView) {
             super(itemView);
             root = itemView;
             label = itemView.findViewById(R.id.typeTextView);

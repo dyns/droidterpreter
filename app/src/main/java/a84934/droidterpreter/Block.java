@@ -3,12 +3,13 @@ package a84934.droidterpreter;
 import android.graphics.Rect;
 
 public class Block {
-    BlockType type;
-    int width, height, color, deltaX, deltaY;
-    Rect r;
-    Object value;
+    public BlockType type;
 
-    enum BlockType {
+    public int width, height, color, deltaX, deltaY;
+    public Rect r;
+    public Object value;
+
+    public enum BlockType {
         ADD,
         NUM,
         MAIN
