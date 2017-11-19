@@ -9,6 +9,7 @@ import a84934.droidterpreter.Interpreter.Interpreter
 import a84934.droidterpreter.MainActivity
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Point
 import android.graphics.Rect
 import android.widget.Toast
 import java.security.AccessController.getContext
@@ -22,30 +23,32 @@ class GController constructor(val gView: GView){
         gView.initGView(this::blockLongCLick, this)
     }
 
-    fun blockLongCLick(blockIndex:Int){
-        showBlockOptions(blockIndex)
+    private fun blockLongCLick(block:Block){
+        showBlockOptions(block)
     }
 
-    fun showBlockOptions(i : Int){
-        val blockV = blocks[i].value
+    private fun showBlockOptions(block:Block){
+
+        val blockV = block.value
         when (blockV){
             is AddBV -> {
                 Toast.makeText(gView.context, "Select left and then right blocks", Toast.LENGTH_LONG).show()
                 // tell view to wait for select 2 blocks
                 gView.waitSelect(2, {
-                    get 2 new blocks and set left and right
+                    blockV.leftBlock = it[0]
+                    blockV.rightBlock = it[1]
                 })
             }
             is NumBV-> {
                 val intent = Intent(gView.context, SetNumValActivity::class.java)
-                intent.putExtra("i", i)
+                intent.putExtra("i", blocks.indexOf(block)) //todo fix this
                 (gView.context as MainActivity).startActivityForResult(intent, MainActivity.Companion.NUM_RESULT)
             }
             is MainBV -> {
                 Toast.makeText(gView.context, "Select start block", Toast.LENGTH_LONG).show()
                 gView.waitSelect(1, {
                     // get that one block and set update main
-                    blockV.startBlock = selectedBlocks[0]
+                    blockV.startBlock = it[0]
                 })
             }
         }
@@ -83,6 +86,20 @@ class GController constructor(val gView: GView){
             }
         }
 
+    }
+
+    fun existsBlockAt(p : Point) : Block?{
+        val x = p.x
+        val y = p.y
+
+        var r: Rect
+        for(i in (blocks.size - 1) downTo 0){
+            r = blocks[i].r
+            if(x >= r.left && x <= r.right && y >= r.top && y <= r.bottom){
+                return blocks[i]
+            }
+        }
+        return null
     }
 
     fun getBlocks() = blocks

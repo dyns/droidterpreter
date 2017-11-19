@@ -1,10 +1,10 @@
 package a84934.droidterpreter.GraphView;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
@@ -21,12 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import a84934.droidterpreter.Block;
-import a84934.droidterpreter.BlockValSetActivities.SetNumValActivity;
 import a84934.droidterpreter.BlockVals.AddBV;
 import a84934.droidterpreter.BlockVals.MainBV;
 import a84934.droidterpreter.BlockVals.NumBV;
-import a84934.droidterpreter.Interpreter.Interpreter;
-import a84934.droidterpreter.MainActivity;
 
 public class GView extends View implements View.OnTouchListener {
 
@@ -178,18 +175,18 @@ public class GView extends View implements View.OnTouchListener {
 
     static class LongHoldTask extends AsyncTask<Void, Void, Boolean> {
 
-        final int blockIndex;
+        final WeakReference<Block> block;
         final WeakReference<SupportActivity> context;
         final WeakReference<GView> gview;
         final WeakReference<GController> controller;
         final WeakReference<BlockLongClickListener> blcl;
 
-        LongHoldTask(int blockIndex, WeakReference<GView> gview,
+        LongHoldTask(WeakReference<Block> block, WeakReference<GView> gview,
                      WeakReference<SupportActivity> context,
                      WeakReference<GController> controller,
                      WeakReference<BlockLongClickListener> blcl){
             super();
-            this.blockIndex = blockIndex;
+            this.block = block;
             this.context = context;
             this.gview = gview;
             this.controller = controller;
@@ -219,77 +216,33 @@ public class GView extends View implements View.OnTouchListener {
                     !context.get().isFinishing()
                     && gview.get() != null
                     && controller.get() != null
-                    && blcl.get() != null){
+                    && blcl.get() != null
+                    && block.get() != null){
 
-                blcl.get().onBlockLongCLick(blockIndex);
-
+                blcl.get().onBlockLongClick(block.get());
             }
         }
     }
 
-    List<Integer> clickedBlocks;
+    List<Block> clickedBlocks;
     Integer toClick;
-    int addBlockWaitIndex;
+    BlocksSelectedListener blocksSelectedListener;
 
-    /*
-    private void showBlockOptions(int i){
-        // disable drag
+    public void waitSelect(int toClick, BlocksSelectedListener listener){
         current = null;
         stopLongHold();
 
-        Block b = controller.getBlock(i); //blocks.get(i);
-
-        Intent intent;
-        switch (b.type){
-            case NUM:
-                intent = new Intent(getContext(), SetNumValActivity.class);
-                intent.putExtra("i", i);
-                ((MainActivity)getContext()).startActivityForResult(intent, MainActivity.Companion.getNUM_RESULT());
-                break;
-            case ADD:
-
-                Toast.makeText(getContext(), "Select left and then right blocks", Toast.LENGTH_LONG).show();
-
-                clickedBlocks = new ArrayList<>();
-                toClick = 2;
-                addBlockWaitIndex = i;
-
-
-                //intent = new Intent(getContext(), SetAddValActivity.class);
-                //intent.putExtra("i", i);
-                //((MainActivity)getContext()).startActivityForResult(intent, MainActivity.Companion.getADD_BLOCK_RESULT());
-
-                break;
-            case MAIN:
-                Toast.makeText(getContext(), "Select start block", Toast.LENGTH_LONG).show();
-
-                clickedBlocks = new ArrayList<>();
-                toClick = 1;
-                addBlockWaitIndex = i;
-
-                break;
-        }
+        this.toClick = toClick;
+        this.blocksSelectedListener = listener;
+        clickedBlocks = new ArrayList<>();
     }
-    */
-
 
     private void setAddBlocksLeftRight(){
-        Block editBlock = controller.getBlock(addBlockWaitIndex); //blocks.get(addBlockWaitIndex);
-
-        switch (editBlock.type){
-            case ADD:
-                AddBV addBV = (AddBV) editBlock.value;
-                addBV.setLeftBlock(controller.getBlock(clickedBlocks.get(0)));
-                addBV.setRightBlock(controller.getBlock(clickedBlocks.get(1)));
-                break;
-            case MAIN:
-                MainBV mainBV = (MainBV) editBlock.value;
-                mainBV.setStartBlock(controller.getBlock(clickedBlocks.get(0)));
-                break;
-        }
+        blocksSelectedListener.onBlocksSelected(clickedBlocks);
 
         clickedBlocks = null;
         toClick = null;
+        blocksSelectedListener = null;
 
         invalidate();
     }
@@ -302,13 +255,6 @@ public class GView extends View implements View.OnTouchListener {
         }
         longHoldTask = null;
     }
-
-    /*
-    public void setBlockValue(int i, Object v){
-        Block b = blocks.get(i);
-        b.value = v;
-        invalidate();
-    }*/
 
     Float _oldX, _oldY;
 
@@ -343,6 +289,45 @@ public class GView extends View implements View.OnTouchListener {
 
                 current = null;
 
+                Block touchedBlock = controller.existsBlockAt(new Point((int)x, (int)y));
+                if(touchedBlock != null){
+                    if(toClick != null){
+                        toClick--;
+                        clickedBlocks.add(touchedBlock);
+
+                        if(toClick <= 0){
+                            setAddBlocksLeftRight();
+                        } else {
+                            Toast.makeText(getContext(), "Click " + toClick + " more block(s)", Toast.LENGTH_SHORT).show();
+                        }
+                        return true;
+                    }
+
+                    // found block
+                    longHoldTask = new LongHoldTask(
+                            new WeakReference<>(touchedBlock),
+                            new WeakReference<>(this),
+                            new WeakReference<>((SupportActivity) getContext()),
+                            new WeakReference<>(controller),
+                            new WeakReference<>(blockLongClickListener));
+                    longHoldTask.execute();
+
+                    current = touchedBlock;
+                    current.deltaX = (int)x - current.r.left;
+                    current.deltaY = (int)y - current.r.top;
+                    Log.d("down", "found block");
+                } else {
+
+                    if(toClick != null){
+                        Toast.makeText(getContext(),
+                                "Not a block, click " + toClick + " more",
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+
+
+                /*
                 for(int i = controller.blockCount() - 1; i > -1; i--){
                     Block b = controller.getBlock(i); //blocks.get(i);
                     Rect r = b.r;
@@ -375,12 +360,13 @@ public class GView extends View implements View.OnTouchListener {
                         break;
                     }
 
+
                     if(toClick != null){
                         Toast.makeText(getContext(),
                                 "Not a block, click " + toClick + " more",
                                 Toast.LENGTH_SHORT).show();
                     }
-                }
+                }*/
 
                 break;
             case MotionEvent.ACTION_UP:
