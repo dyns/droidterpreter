@@ -20,7 +20,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import a84934.droidterpreter.Block;
 import a84934.droidterpreter.BlockVals.AddBV;
 import a84934.droidterpreter.BlockVals.MainBV;
 import a84934.droidterpreter.BlockVals.NumBV;
@@ -83,60 +82,7 @@ public class GView extends View implements View.OnTouchListener {
 
     @Override
     public void onDraw(Canvas canvas){
-        // clear
-        canvas.drawColor(Color.WHITE);
-
-        p.setStyle(Paint.Style.FILL);
-        for(Block b : controller.getBlocks()){
-            p.setColor(b.color);
-            canvas.drawRect(b.r, p);
-            p.setColor(Color.WHITE);
-            p.setTextSize(75);
-            p.setStrokeWidth(10);
-
-            //canvas.drawRect(new Rect(b.r.left, b.r.top, b.r.left + 30, b.r.top + 30), p);
-
-            p.setTextAlign(Paint.Align.LEFT);
-            //canvas.drawText("L", b.r.left, b.r.bottom, p);
-
-            int offset = 15;
-            int textLeft = b.r.left + offset;
-            int textBottom = b.r.bottom - offset;
-
-            int centerX = b.r.left + (b.width / 2);
-            int centerOffset = (b.width / 4);
-
-            Block toBlock;
-
-            if(b.type == Block.BlockType.NUM){
-                String v = Integer.toString(((NumBV)b.value).getNumber());
-                canvas.drawText(v, textLeft, textBottom, p);
-            } else if(b.type == Block.BlockType.ADD){
-
-                canvas.drawText("+", textLeft, textBottom, p);
-                if(b.value != null){
-                    p.setColor(Color.BLACK);
-                    AddBV v = (AddBV)b.value;
-                    if(v.getLeftBlock() != null) {
-                        toBlock = v.getLeftBlock();
-                        canvas.drawLine(centerX - centerOffset, b.r.bottom, toBlock.r.left, toBlock.r.top, p);
-                    }
-                    if(v.getRightBlock() != null){
-                        toBlock = v.getRightBlock();
-                        canvas.drawLine(centerX + centerOffset, b.r.bottom, toBlock.r.left, toBlock.r.top, p);
-                    }
-                }
-            } else if(b.type == Block.BlockType.MAIN){
-                canvas.drawText("M", textLeft, textBottom, p);
-                MainBV v = (MainBV) b.value;
-                if(v.getStartBlock() != null){
-                    p.setColor(Color.BLACK);
-                    toBlock = v.getStartBlock();
-                    canvas.drawLine(centerX + centerOffset, b.r.bottom, toBlock.r.left, toBlock.r.top, p);
-                }
-            }
-
-        }
+        GViewKotKt.gviewKotOnDraw(canvas, p, controller);
     }
 
     Block current = null;
@@ -145,8 +91,8 @@ public class GView extends View implements View.OnTouchListener {
         int x = (int)_x;
         int y = (int)_y;
 
-        x = x - b.deltaX;
-        y -= b.deltaY;
+        x = x - b.getDeltaX();
+        y -= b.getDeltaY();
 
         if(x < 0){
             x = 0;
@@ -155,22 +101,21 @@ public class GView extends View implements View.OnTouchListener {
             y = 0;
         }
 
-        int right = x + b.width;
-        int bottom = y + b.height;
+        int right = x + b.getWidth();
+        int bottom = y + b.getHeight();
 
         if(right > canvasWidth){
-            x = canvasWidth - b.width;
+            x = canvasWidth - b.getWidth();
         }
         if(bottom > canvasHeight){
-            y = canvasHeight - b.height;
+            y = canvasHeight - b.getHeight();
         }
 
-        right = x + b.width;
-        bottom = y + b.height;
+        right = x + b.getWidth();
+        bottom = y + b.getHeight();
 
-        b.r = new Rect(x,y, right, bottom);
+        b.setR(new Rect(x,y, right, bottom));
     }
-
 
 
     static class LongHoldTask extends AsyncTask<Void, Void, Boolean> {
@@ -303,6 +248,7 @@ public class GView extends View implements View.OnTouchListener {
                         return true;
                     }
 
+                    //todo figure out these which are needed to be weak
                     // found block
                     longHoldTask = new LongHoldTask(
                             new WeakReference<>(touchedBlock),
@@ -313,8 +259,8 @@ public class GView extends View implements View.OnTouchListener {
                     longHoldTask.execute();
 
                     current = touchedBlock;
-                    current.deltaX = (int)x - current.r.left;
-                    current.deltaY = (int)y - current.r.top;
+                    current.setDeltaX((int)x - current.getR().left);
+                    current.setDeltaY((int)y - current.getR().top);
                     Log.d("down", "found block");
                 } else {
 

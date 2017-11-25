@@ -1,8 +1,7 @@
 package a84934.droidterpreter
 
 import a84934.droidterpreter.BlockVals.NumBV
-import a84934.droidterpreter.GraphView.GController
-import a84934.droidterpreter.GraphView.GView
+import a84934.droidterpreter.GraphView.*
 import android.app.Activity
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
@@ -56,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
         rootView.addView(gView)
 
-        controller!!.addPlus(Block.BlockType.MAIN)
+        controller!!.addPlus(BlockType.MAIN)
 
     }
 
@@ -67,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                 if(requestCode == BLOCK_TYPE_RESULT){
                     var i = data.getIntExtra("i", -1);
                     if(i != -1){
-                        controller!!.addPlus(Block.fromIndex(i))
+                        controller!!.addPlus(blockTypeForIndex(i))
                     }
                 } else if(requestCode == NUM_RESULT){
                     var v = data.getIntExtra("v", 0)

@@ -29,7 +29,7 @@ public class BlockPickerActivity extends AppCompatActivity {
                 BlockPickerActivity.this.setResult(RESULT_OK, data);
                 finish();
             }
-        }, ApplicationKl.blockTypes);
+        });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);

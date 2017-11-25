@@ -9,13 +9,12 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import a84934.droidterpreter.GraphView.BlockType;
+
 public class BlockTypeAdapter extends RecyclerView.Adapter<BlockTypeAdapter.VH>{
 
-    private final List<String> blockTypes;
-
-    BlockTypeAdapter(OnClickListener listener, final List<String> blockTypes){
+    BlockTypeAdapter(OnClickListener listener){
         super();
-        this.blockTypes = blockTypes;
         this.listener = listener;
     }
 
@@ -34,12 +33,12 @@ public class BlockTypeAdapter extends RecyclerView.Adapter<BlockTypeAdapter.VH>{
 
     @Override
     public void onBindViewHolder(final VH holder, int position) {
-        holder.label.setText(blockTypes.get(position));
+        holder.label.setText(BlockType.values()[position].name());
     }
 
     @Override
     public int getItemCount() {
-        return blockTypes.size();
+        return BlockType.values().length;
     }
 
     class VH extends RecyclerView.ViewHolder {
