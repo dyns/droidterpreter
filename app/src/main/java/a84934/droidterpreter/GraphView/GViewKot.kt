@@ -7,6 +7,8 @@ import a84934.droidterpreter.BlockVals.NumBV
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Point
+import android.widget.Toast
 
 fun gviewKotOnDraw(canvas : Canvas, p: Paint, controller : GController) {
 
@@ -51,11 +53,21 @@ fun gviewKotOnDraw(canvas : Canvas, p: Paint, controller : GController) {
                 val v = b.value as AddBV;
                 if(v.leftBlock != null) {
                     val toBlock = v.leftBlock!!;
-                    canvas.drawLine(centerX - centerOffset.toFloat(), b.r.bottom.toFloat(), toBlock.r.left.toFloat(), toBlock.r.top.toFloat(), p);
+//                    canvas.drawLine(centerX - centerOffset.toFloat(), b.r.bottom.toFloat(), toBlock.r.left.toFloat(), toBlock.r.top.toFloat(), p);
+                    drawLine(
+                            b.absoluteLeftOut(),
+                            toBlock.absoluteHandleOffset(),
+                            canvas, p
+                    )
                 }
                 if(v.rightBlock != null){
                     val toBlock = v.rightBlock!!;
-                    canvas.drawLine(centerX + centerOffset.toFloat(), b.r.bottom.toFloat(), toBlock.r.left.toFloat(), toBlock.r.top.toFloat(), p);
+                    //canvas.drawLine(centerX + centerOffset.toFloat(), b.r.bottom.toFloat(), toBlock.r.left.toFloat(), toBlock.r.top.toFloat(), p);
+                    drawLine(
+                            b.absoluteRightOut(),
+                            toBlock.absoluteHandleOffset(),
+                            canvas, p
+                    )
                 }
 
                 Unit
@@ -68,11 +80,21 @@ fun gviewKotOnDraw(canvas : Canvas, p: Paint, controller : GController) {
                 val v = b.value as MultBV
                 if(v.leftBlock != null) {
                     val toBlock = v.leftBlock!!;
-                    canvas.drawLine(centerX - centerOffset.toFloat(), b.r.bottom.toFloat(), toBlock.r.left.toFloat(), toBlock.r.top.toFloat(), p);
+//                    canvas.drawLine(centerX - centerOffset.toFloat(), b.r.bottom.toFloat(), toBlock.r.left.toFloat(), toBlock.r.top.toFloat(), p);
+                    drawLine(
+                            b.absoluteLeftOut(),
+                            toBlock.absoluteHandleOffset(),
+                            canvas, p
+                    )
                 }
                 if(v.rightBlock != null){
                     val toBlock = v.rightBlock!!;
-                    canvas.drawLine(centerX + centerOffset.toFloat(), b.r.bottom.toFloat(), toBlock.r.left.toFloat(), toBlock.r.top.toFloat(), p);
+                    //canvas.drawLine(centerX + centerOffset.toFloat(), b.r.bottom.toFloat(), toBlock.r.left.toFloat(), toBlock.r.top.toFloat(), p);
+                    drawLine(
+                            b.absoluteRightOut(),
+                            toBlock.absoluteHandleOffset(),
+                            canvas, p
+                    )
                 }
 
                 Unit
@@ -84,15 +106,22 @@ fun gviewKotOnDraw(canvas : Canvas, p: Paint, controller : GController) {
                 if(v.startBlock != null){
                     p.setColor(Color.BLACK);
                     val toBlock = v.startBlock!!;
-                    canvas.drawLine(centerX + centerOffset.toFloat(), b.r.bottom.toFloat(), toBlock.r.left.toFloat(), toBlock.r.top.toFloat(), p);
+                    //canvas.drawLine(centerX + centerOffset.toFloat(), b.r.bottom.toFloat(), toBlock.r.left.toFloat(), toBlock.r.top.toFloat(), p);
+                    drawLine(
+                            b.absoluteCenterOut(),
+                            toBlock.absoluteHandleOffset(),
+                            canvas, p)
                 }
                 Unit
             }
         }
-
-
-
     }
+    
+}
 
-
+private fun drawLine(a : Pair<Float, Float>, b : Pair<Float, Float>, canvas : Canvas, p : Paint){
+    val radius = 15f //todo change to dp
+    canvas.drawCircle(a.first, a.second, radius,p)
+    canvas.drawCircle(b.first, b.second, radius,p)
+    canvas.drawLine(a.first, a.second, b.first, b.second, p)
 }
