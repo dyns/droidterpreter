@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="a84934.droidterpreter.MainActivity"
@@ -11,6 +11,7 @@
     >
 
     <LinearLayout
+        android:id="@+id/buttonBar"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:orientation="horizontal">
@@ -42,8 +43,24 @@
     </LinearLayout>
 
 
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_below="@id/buttonBar"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/gviewContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"/>
 
-</LinearLayout>
+
+    <include
+        android:visibility="gone"
+        layout="@layout/toast"
+        android:layout_height="48dp"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        />
+
+</RelativeLayout>
 
 <!--<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
     <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->

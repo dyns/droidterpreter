@@ -27,7 +27,7 @@ fun parseBlocks(b : Block?) : Interpreter.Expr{
             Interpreter.Expr.NumE(bVal.number)
         }
         is MultBV -> {
-            Interpreter.Expr.AddE(
+            Interpreter.Expr.MultE(
                     parseBlocks(bVal.leftBlock),
                     parseBlocks(bVal.rightBlock)
             )

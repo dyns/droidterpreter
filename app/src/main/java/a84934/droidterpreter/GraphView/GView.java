@@ -2,7 +2,6 @@ package a84934.droidterpreter.GraphView;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -19,10 +18,6 @@ import android.widget.Toast;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-
-import a84934.droidterpreter.BlockVals.AddBV;
-import a84934.droidterpreter.BlockVals.MainBV;
-import a84934.droidterpreter.BlockVals.NumBV;
 
 public class GView extends View implements View.OnTouchListener {
 
@@ -243,8 +238,10 @@ public class GView extends View implements View.OnTouchListener {
                         if(toClick <= 0){
                             setAddBlocksLeftRight();
                         } else {
-                            Toast.makeText(getContext(), "Click " + toClick + " more block(s)", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getContext(), "Click " + toClick + " more block(s)", Toast.LENGTH_SHORT).show();
+                            controller.showMessage("Click " + toClick + " more block(s)");
                         }
+
                         return true;
                     }
 
@@ -271,48 +268,6 @@ public class GView extends View implements View.OnTouchListener {
                     }
 
                 }
-
-
-                /*
-                for(int i = controller.blockCount() - 1; i > -1; i--){
-                    Block b = controller.getBlock(i); //blocks.get(i);
-                    Rect r = b.r;
-                    if(x >= r.left && x <= r.right && y >= r.top && y <= r.bottom){
-
-                        if(toClick != null){
-                            toClick--;
-                            clickedBlocks.add(i);
-
-                            if(toClick <= 0){
-                                setAddBlocksLeftRight();
-                            } else {
-                                Toast.makeText(getContext(), "Click " + toClick + " more block(s)", Toast.LENGTH_SHORT).show();
-                            }
-                            return true;
-                        }
-
-                        // found block
-                        longHoldTask = new LongHoldTask(i,
-                                new WeakReference<>(this),
-                                new WeakReference<>((SupportActivity) getContext()),
-                                new WeakReference<>(controller),
-                                new WeakReference<>(blockLongClickListener));
-                        longHoldTask.execute();
-
-                        current = b;
-                        current.deltaX = (int)x - r.left;
-                        current.deltaY = (int)y - r.top;
-                        Log.d("down", "found block");
-                        break;
-                    }
-
-
-                    if(toClick != null){
-                        Toast.makeText(getContext(),
-                                "Not a block, click " + toClick + " more",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }*/
 
                 break;
             case MotionEvent.ACTION_UP:

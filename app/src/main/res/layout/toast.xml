@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toastBar"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="48dp">
+
+    <TextView
+        android:id="@+id/toastTV"
+        android:textSize="14sp"
+        android:textColor="@android:color/white"
+        android:background="@color/colorPrimary"
+        android:paddingLeft="16dp"
+        android:gravity="center_vertical"
+        android:text="message"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="4"/>
+
+    <TextView
+        android:id="@+id/closeToastTV"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"
+        android:background="@color/colorPrimaryDark"
+        android:gravity="center"
+        android:text="X"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
+
+</LinearLayout>

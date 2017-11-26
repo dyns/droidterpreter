@@ -4,19 +4,40 @@ import a84934.droidterpreter.BlockValSetActivities.SetNumValActivity
 import a84934.droidterpreter.BlockVals.*
 import a84934.droidterpreter.Interpreter.Interpreter
 import a84934.droidterpreter.MainActivity
+import a84934.droidterpreter.R
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Rect
+import android.view.View
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
+import kotlinx.android.synthetic.main.toast.view.*
 import java.util.*
 import kotlin.collections.ArrayList
 
 
-class GController constructor(val gView: GView){
+class GController constructor(val gView: GView, val toastBar : LinearLayout){
+
+    val toastCloseTV = toastBar.findViewById<TextView>(R.id.closeToastTV)
+    val toastMessageTV = toastBar.findViewById<TextView>(R.id.toastTV)
 
     init {
         gView.initGView(this::blockLongCLick, this)
+
+        toastCloseTV.setOnClickListener({
+            hideMessageBar()
+        })
+    }
+
+    public fun showMessage(text : String){
+        toastBar.visibility = View.VISIBLE
+        toastMessageTV.text = text
+    }
+
+    private fun hideMessageBar(){
+        toastBar.visibility = View.GONE
     }
 
     private fun blockLongCLick(block:Block){
@@ -30,9 +51,12 @@ class GController constructor(val gView: GView){
             is AddBV -> {
 
                 {
-                    Toast.makeText(gView.context, "Select left and then right blocks", Toast.LENGTH_LONG).show()
+                    val messageText = "Select left and then right blocks"
+                    //Toast.makeText(gView.context, messageText, Toast.LENGTH_LONG).show()
+                    showMessage(messageText)
                     // tell view to wait for select 2 blocks
                     gView.waitSelect(2, {
+                        hideMessageBar()
                         blockV.leftBlock = it[0]
                         blockV.rightBlock = it[1]
                     })
@@ -48,8 +72,10 @@ class GController constructor(val gView: GView){
             }
             is MainBV -> {
                 {
-                    Toast.makeText(gView.context, "Select start block", Toast.LENGTH_LONG).show()
+                    //Toast.makeText(gView.context, "Select start block", Toast.LENGTH_LONG).show()
+                    showMessage("Select start block")
                     gView.waitSelect(1, {
+                        hideMessageBar()
                         // get that one block and set update main
                         blockV.startBlock = it[0]
                     })
@@ -59,9 +85,11 @@ class GController constructor(val gView: GView){
                 {
 
                     //todo - abstract this, used for addbv too
-                    Toast.makeText(gView.context, "Select left and then right blocks", Toast.LENGTH_LONG).show()
+                    //Toast.makeText(gView.context, "Select left and then right blocks", Toast.LENGTH_LONG).show()
                     // tell view to wait for select 2 blocks
+                    showMessage("Select left and then right blocks")
                     gView.waitSelect(2, {
+                        hideMessageBar()
                         blockV.leftBlock = it[0]
                         blockV.rightBlock = it[1]
                     })
@@ -99,7 +127,7 @@ class GController constructor(val gView: GView){
 
     fun blockCount() = blocks.size
 
-    fun addPlus(type : BlockType){
+    fun addNewBlock(type : BlockType){
 
         val random = Random()
 

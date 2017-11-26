@@ -30,11 +30,14 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, GuideActivity::class.java));
         })
 
-        var rootView = this.findViewById<LinearLayout>(R.id.mainRoot)
+        //var rootView = this.findViewById<LinearLayout>(R.id.mainRoot)
+
+        val containerRoot = this.findViewById<LinearLayout>(R.id.gviewContainer)
+        val toastView = this.findViewById<LinearLayout>(R.id.toastBar)
 
         gView = GView(this)
 
-        controller = GController(gView!!)
+        controller = GController(gView!!, toastView)
 
         gView!!.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -43,7 +46,7 @@ class MainActivity : AppCompatActivity() {
 
         var addButton = this.findViewById<Button>(R.id.addButton);
         addButton.setOnClickListener({
-            //gView.addPlus()
+            //gView.addNewBlock()
             //startActivity(Intent(this, BlockPickerActivity::class.java))
             startActivityForResult(Intent(this, BlockPickerActivity::class.java), BLOCK_TYPE_RESULT)
         });
@@ -53,10 +56,9 @@ class MainActivity : AppCompatActivity() {
             controller!!.execute()
         })
 
-        rootView.addView(gView)
+        containerRoot.addView(gView)
 
-        controller!!.addPlus(BlockType.MAIN)
-
+        controller!!.addNewBlock(BlockType.MAIN)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -66,7 +68,7 @@ class MainActivity : AppCompatActivity() {
                 if(requestCode == BLOCK_TYPE_RESULT){
                     var i = data.getIntExtra("i", -1);
                     if(i != -1){
-                        controller!!.addPlus(blockTypeForIndex(i))
+                        controller!!.addNewBlock(blockTypeForIndex(i))
                     }
                 } else if(requestCode == NUM_RESULT){
                     var v = data.getIntExtra("v", 0)
